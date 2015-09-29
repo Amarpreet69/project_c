@@ -1,3 +1,6 @@
+/*Before running make sure you have mysql-server installed and 'attendance' named database is created.
+username and password will be your's mysql username and password.*/ 
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<mysql/mysql.h>
@@ -24,9 +27,9 @@ int main() {
 	con = mysql_init(NULL);	
 
 	if(mysql_real_connect(con, server, username, password, database, port, NULL, 0))
-		printf("Connected to temp..\n");
+		printf("Connected to database.\n");
 	else
-		printf("Not Connected\n");
+		printf("Database connection failed.\n");
 
 	
 	while(dec) {
