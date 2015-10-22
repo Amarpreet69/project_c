@@ -1,9 +1,24 @@
-/*Yet to be implemented.*/
+#ifndef unix
+#define WIN32
+#include <windows.h>
+#include <winsock.h>
 
-void addsubject();
-void addstudent();
-void removesubject();
-void removestudent();
-void showstatistics();
-void present();
-void absent();
+#else
+#define closesocket close
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#endif
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#define PROTOPORT 5193 /* default protocol port number */
+
+extern int errno;
+
+char localhost[] = "localhost"; /* default host name */ 
+
