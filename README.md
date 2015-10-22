@@ -6,4 +6,6 @@ Usability :
 For running this, directory contained of two files that is for two devices, both the file should be at running state.
 One file will act as server and another as client. For running server, port number must be specify using command line and while running client hostname (generally it will be your pc name) and port number of server must be specify in command line to work. Enjoy communication.
 
+NOTE : You should send the message only when you are prompted with "you :". This means that one is at sending state while other is in recieving state.
+
 "Communication Matters."
