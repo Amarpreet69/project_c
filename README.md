@@ -1,3 +1,2 @@
-This project is about managing attendance. It has been observed that managing presenty and absenty of students from respective subjects/courses can be difficult. As of using papers calculating presenty/absenty % and identifying low % students can be tedious job. Also if student having low attendance can be informed likewisely. This all things can be concluded to this project.
-	One of the thing is that presenty/absenty taking of students can be done through this. Monthly report can be calculated of respective subject.
-For managing this kind of data, structured way of storage is being used called 'MySQL'.
+"C Messenger". Communication between two devices/machines, one can send messages/data to another machine in a network.
+C messenger basically contains messaging/texting between two communicating devices over network. This also includes sending of files between devices. It uses TCP/IP protocol for sending/recieving data.
