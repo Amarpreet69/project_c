@@ -5,9 +5,9 @@ int main(int argc, char *argv[])
 	int sockfd, sd2, portno, n;
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
-	char buffer[256], temp[256], ti[256], temp2[256];
+	char buffer[256], temp[256], ti[256], temp2[256], hostname[256] = "";
 	char output[256];
-	int filesize;
+	int filesize, port = 0;
 	//struct hostent *ptrh; /* pointer to a host table entry */
 	struct protoent *ptrp; /* pointer to a protocol table entry */
 	//struct sockaddr_in sad; /* structure to hold an IP address */
@@ -30,13 +30,20 @@ int main(int argc, char *argv[])
 	/* Check command-line argument for protocol port and extract */
 	/* port number if one is specified. Otherwise, use the default */
 	/* port value given by constant PROTOPORT */
+	
+	write(1,"\E[H\E[2J",7);
+	printf("Hostname : ");
+	scanf("%s", hostname);
+	printf("Port : ");
+	scanf("%d", &port);
+	write(1,"\E[H\E[2J",7);
 
-	if (argc < 3) {
+	if (strcmp(hostname, "") == 0 && port == 0) {
 		fprintf(stderr,"usage %s hostname port\n", argv[0]);
 		exit(0);
 	}
 
-	portno = atoi(argv[2]);
+	portno = port;
 	
 
 	if ( ((int)(ptrp = getprotobyname("tcp"))) == 0) {
@@ -50,7 +57,7 @@ int main(int argc, char *argv[])
 	
 	if (sockfd < 0) 
         	error("ERROR opening socket");
-	server = gethostbyname(argv[1]);
+	server = gethostbyname(hostname);
 
 	if (server == NULL) {
 		fprintf(stderr,"ERROR, no such host\n");
@@ -127,6 +134,7 @@ SENDFILE :
 		
 		if((fp = fopen(file_buffer, "r")) == NULL){
 			printf("File not found.\n");
+			write(sockfd, "fail", 5);
 			goto RMESSAGE;
 		}
 		else
@@ -166,6 +174,11 @@ RECIEVEFILE :
 		file_buffer[n] = '\0';
 		//printf("%s %d\n",file_buffer,n);
 		fflush(stdout);
+		
+		if(strcmp(file_buffer, "fail") == 0) {
+			printf("%s", "                                           File recieving failed.\n");
+			goto WMESSAGE;
+		} 
 		
 		fp = fopen("DOWNLOADED.TXT", "w");
 
