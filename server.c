@@ -5,6 +5,7 @@
 
 int main(int argc, char *argv[])
 {
+	int server_port = 0;
 	int sockfd, newsockfd, portno;
 	socklen_t clilen;
 	char buffer[256], temp[256], ti[256], temp2[256];
@@ -36,8 +37,13 @@ int main(int argc, char *argv[])
 	/* Check command-line argument for protocol port and extract */
 	/* port number if one is specified. Otherwise, use the default */
 	/* port value given by constant PROTOPORT */
+	
+	write(1,"\E[H\E[2J",7);
+	printf("Port : ");
+	scanf("%d", &server_port);
+	write(1,"\E[H\E[2J",7);
 
-	if (argc < 2) {
+	if (server_port == 0) {
 		fprintf(stderr,"ERROR, no port provided\n");
 		exit(1);
 	}
@@ -52,7 +58,7 @@ int main(int argc, char *argv[])
 	if (sockfd < 0) 
 		error("ERROR opening socket");
 	bzero((char *) &serv_addr, sizeof(serv_addr));
-	portno = atoi(argv[1]);
+	portno = server_port;
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
@@ -125,6 +131,10 @@ RECIEVEFILE :
 		file_buffer[n] = '\0';
 		//printf("%s %d\n",file_buffer,n);
 		fflush(stdout);
+		if(strcmp(file_buffer, "fail") == 0) {
+			printf("%s", "                                           File recieving failed.\n");
+			goto WMESSAGE;
+		} 
 		
 		fp = fopen("DOWNLOADED.TXT", "w");
 
@@ -154,6 +164,7 @@ SENDFILE :
 		
 		if((fp = fopen(file_buffer, "r")) == NULL){
 			printf("File not found.\n");
+			write(newsockfd, "fail", 5);
 			goto RMESSAGE;
 		}
 		else
