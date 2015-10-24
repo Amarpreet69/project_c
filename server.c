@@ -2,20 +2,15 @@
    The port number is passed as an argument */
 #include "messenger.h"
 
-void error(const char *msg)
-{
-    perror(msg);
-    exit(1);
-}
 
 int main(int argc, char *argv[])
 {
 	int sockfd, newsockfd, portno;
 	socklen_t clilen;
-	char buffer[256], temp[256];
+	char buffer[256], temp[256], ti[256], temp2[256];
 	char output[256];
 	struct sockaddr_in serv_addr, cli_addr;
-	int n;
+	int n, filesize;
 	struct hostent *ptrh; /* pointer to a host table entry */
 	struct protoent *ptrp; /* pointer to a protocol table entry */
 	//struct sockaddr_in sad; /* structure to hold an IP address */
@@ -26,7 +21,7 @@ int main(int argc, char *argv[])
 	//char buf_recv[1000],buf_send[100]; /* buffer for data from the server */
 	char *filename;
 	char file_buffer[10000], f_buffer[256];
-	FILE *fp;
+	FILE *fp, *logs;
 
 #ifdef WIN32
 	
@@ -71,10 +66,14 @@ int main(int argc, char *argv[])
 	if (newsockfd < 0) 
 		error("ERROR on accept");
 	
+	logs = fopen("Log1", "a+");
+
 	printf("\n------------------------You are Connected----------------------\n");
+	
 	
 RMESSAGE :	bzero(output,256);
 		n = read(newsockfd,output,255);
+		
 		
 		if(strcmp(output, "SENDFILE\n") == 0) {
 			goto RECIEVEFILE;					
@@ -89,6 +88,12 @@ RMESSAGE :	bzero(output,256);
 			error("ERROR reading from socket");
 
 		printf("                                           %s\n",output);
+		current_time();
+		strip(output);
+		strcat(strcat(strcat(c_time, "\t"), output), "\n");
+		fputs(c_time, logs);
+		memset(&c_time, 0, sizeof(c_time));
+
 WMESSAGE:	printf("You : ");	
 		fgets(buffer, 255, stdin);
 		n = write(newsockfd, buffer, strlen(buffer));
@@ -102,6 +107,13 @@ WMESSAGE:	printf("You : ");
 		if((strcmp(buffer, "CLOSE\n") != 0)){
 			if (n < 0)
 				error("ERROR writing to socket");
+			strcpy(temp2, buffer);
+			current_time();
+			strip(temp2);
+			strcat(strcat(strcat(c_time, "\tYou : "), temp2), "\n");
+			fputs(c_time, logs);
+			memset(&c_time, 0, sizeof(c_time));
+			memset(&temp2, 0, sizeof(temp2));			
 		goto RMESSAGE;
 		}
 		else
@@ -119,7 +131,13 @@ RECIEVEFILE :
 		fputs(file_buffer, fp);
 		
 		printf("File recieved (Name : %s, Size : %d bytes)\n", temp, n);
-		
+		sprintf(ti, "File recieved (Name : %s, Size : %d bytes)", temp, n);
+		current_time();
+		strcat(strcat(strcat(c_time, "\t"), ti), "\n");
+		fputs(c_time, logs);
+		memset(&c_time, 0, sizeof(c_time));
+		memset(&ti, 0, sizeof(ti));
+
 		fclose(fp);
 		
 		goto WMESSAGE;
@@ -127,6 +145,7 @@ RECIEVEFILE :
 SENDFILE :	
 		printf("Enter Filename in current directory : ");
 		scanf("%s", file_buffer);
+		strcpy(temp2, file_buffer);
 		
 		write(newsockfd, file_buffer, strlen(file_buffer));
 
@@ -153,7 +172,16 @@ SENDFILE :
 
 		send(newsockfd, file_buffer, strlen(file_buffer), 0);
 		
-		printf("File sent.\n");
+		printf("File sent.\n");		
+		filesize = file_size(temp2);
+		sprintf(ti, "You : File sent (Name : %s, Size : %d bytes)", temp2, filesize);
+	
+		current_time();
+		strcat(strcat(strcat(c_time, "\t"), ti), "\n");
+		fputs(c_time, logs);
+		memset(&c_time, 0, sizeof(c_time));
+		memset(&ti, 0, sizeof(ti));
+		memset(&temp2, 0, sizeof(temp2));
 	
 		goto RMESSAGE;
 
@@ -162,5 +190,6 @@ SENDFILE :
 EXIT :		printf("\n-----------------------You are Disconnected--------------------\n");	
 	close(newsockfd);
 	close(sockfd);
+	fclose(logs);
 return 0; 
 }
