@@ -1,18 +1,13 @@
 #include "messenger.h"
 
-void error(const char *msg)
-{
-    perror(msg);
-    exit(0);
-}
-
 int main(int argc, char *argv[])
 {
 	int sockfd, sd2, portno, n;
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
-	char buffer[256], temp[256];
+	char buffer[256], temp[256], ti[256], temp2[256];
 	char output[256];
+	int filesize;
 	//struct hostent *ptrh; /* pointer to a host table entry */
 	struct protoent *ptrp; /* pointer to a protocol table entry */
 	//struct sockaddr_in sad; /* structure to hold an IP address */
@@ -23,7 +18,7 @@ int main(int argc, char *argv[])
 	//char buf_recv[1000],buf_send[100]; /* buffer for data from the server */
 	char *filename;
 	char file_buffer[10000], f_buffer[256];
-	FILE *fp;
+	FILE *fp, *logc;
 
 #ifdef WIN32
 	WSADATA wsaData;
@@ -70,6 +65,8 @@ int main(int argc, char *argv[])
 	if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
 		error("ERROR connecting");
 	
+	logc = fopen("Log2", "a+");
+	
 	printf("\n------------------------You are Connected----------------------\n");
 
 WMESSAGE:	printf("You : ");
@@ -80,6 +77,13 @@ WMESSAGE:	printf("You : ");
 			goto SENDFILE;		
 		}
 		if((strcmp(buffer, "CLOSE\n") != 0)){
+			strcpy(temp2, buffer);
+			current_time();
+			strip(temp2);
+			strcat(strcat(strcat(c_time, "\tYou : "), temp2), "\n");
+			fputs(c_time, logc);
+			memset(&c_time, 0, sizeof(c_time));
+			memset(&temp2, 0, sizeof(temp2));			
 		}
 		else {
 			goto EXIT;
@@ -99,14 +103,22 @@ RMESSAGE:	bzero(output, 256);
 
 		if((strcmp(output, "CLOSE\n") != 0)) {
 			 printf("                                           %s\n", output);
+			current_time();
+		strip(output);
+			strcat(strcat(strcat(c_time, "\t"), output), "\n");
+			fputs(c_time, logc);
+			memset(&c_time, 0, sizeof(c_time));
 			goto WMESSAGE;
 		}
 		else
 			goto EXIT;
+		
+		
 
 SENDFILE : 	
 		printf("Enter Filename in current directory : ");
 		scanf("%s", file_buffer);
+		strcpy(temp2, file_buffer);
 		
 		write(sockfd, file_buffer, strlen(file_buffer));
 
@@ -135,6 +147,16 @@ SENDFILE :
 		
 		printf("File sent.\n");
 		
+		filesize = file_size(temp2);
+		sprintf(ti, "You : File sent (Name : %s, Size : %d bytes)", temp2, filesize);
+	
+		current_time();
+		strcat(strcat(strcat(c_time, "\t"), ti), "\n");
+		fputs(c_time, logc);
+		memset(&c_time, 0, sizeof(c_time));
+		memset(&ti, 0, sizeof(ti));
+		memset(&temp2, 0, sizeof(temp2));
+		
 		goto RMESSAGE;
 
 RECIEVEFILE :
@@ -150,6 +172,13 @@ RECIEVEFILE :
 		fputs(file_buffer, fp);
 		
 		printf("File recieved (Name : %s, Size : %d bytes)\n", temp, n);
+		sprintf(ti, "File recieved (Name : %s, Size : %d bytes)", temp, n);
+
+		current_time();
+		strcat(strcat(strcat(c_time, "\t"), ti), "\n");
+		fputs(c_time, logc);
+		memset(&c_time, 0, sizeof(c_time));
+		memset(&ti, 0, sizeof(ti));
 		
 		fclose(fp);
 		
@@ -158,5 +187,6 @@ RECIEVEFILE :
 	
 EXIT :		printf("\n-----------------------You are Disconnected--------------------\n");	
 		close(sockfd);
+		fclose(logc);
 return 0;
 }
