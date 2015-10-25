@@ -15,7 +15,6 @@ int main(int argc, char *argv[])
 	struct hostent *ptrh; /* pointer to a host table entry */
 	struct protoent *ptrp; /* pointer to a protocol table entry */
 	//struct sockaddr_in sad; /* structure to hold an IP address */
-	//int sd; /* socket descriptor */
 	//int port; /* protocol port number */
 	char *host; /* pointer to host name */
 	//int n; /* number of characters read */
